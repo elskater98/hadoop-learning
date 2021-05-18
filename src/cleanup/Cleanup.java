@@ -21,25 +21,37 @@ import java.net.URI;
 
 public class Cleanup extends Configured implements Tool {
     public int run(String[] args) throws Exception {
+        //Get configuration
         Configuration conf = getConf();
 
+        // Get arguments
         args = new GenericOptionsParser(conf, args).getRemainingArgs();
 
+        // Init job
         Job job = Job.getInstance(conf, "Cleanup");
         job.setJarByClass(getClass());
 
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+
+        /* Chain Mapper Structure */
+
+        //CorrectFields
         ChainMapper.addMapper(job, CorrectFieldsMapper.class, LongWritable.class,
                 Text.class, LongWritable.class, Text.class,
                 new Configuration(false));
 
+        //LowerCase
         ChainMapper.addMapper(job, LowerCaseMapper.class, LongWritable.class,
                 Text.class, LongWritable.class, Text.class,
                 new Configuration(false));
 
+        //LanguageFilter
         ChainMapper.addMapper(job, LanguageFilterMapper.class, LongWritable.class,
                 Text.class, Text.class, Text.class,
                 new Configuration(false));
 
+        //FieldSelector
         ChainMapper.addMapper(job, CustomFieldSelectorMapper.class, Text.class,
                 Text.class, Text.class, Text.class,
                 new Configuration(false));
@@ -53,9 +65,6 @@ public class Cleanup extends Configured implements Tool {
 
         FileSystem fs = FileSystem.get(new URI(outputPath.toString()), conf);
         fs.delete(outputPath, true);
-
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
 
         return (job.waitForCompletion(true) ? 0 : 1);
     }
