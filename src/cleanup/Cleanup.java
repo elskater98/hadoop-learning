@@ -28,21 +28,13 @@ public class Cleanup extends Configured implements Tool {
         Job job = Job.getInstance(conf, "Cleanup");
         job.setJarByClass(getClass());
 
-        ChainMapper.addMapper(job, CorrectFieldsMapper.class, LongWritable.class,
-                Text.class, LongWritable.class, Text.class,
-                new Configuration(false));
+        ChainMapper.addMapper(job, CorrectFieldsMapper.class, LongWritable.class, Text.class, LongWritable.class, Text.class, new Configuration(false));
 
-        ChainMapper.addMapper(job, LowerCaseMapper.class, LongWritable.class,
-                Text.class, LongWritable.class, Text.class,
-                new Configuration(false));
+        ChainMapper.addMapper(job, LanguageFilterMapper.class, LongWritable.class, Text.class, LongWritable.class, Text.class, new Configuration(false));
 
-        ChainMapper.addMapper(job, LanguageFilterMapper.class, LongWritable.class,
-                Text.class, Text.class, Text.class,
-                new Configuration(false));
+        ChainMapper.addMapper(job, CustomFieldSelectorMapper.class, LongWritable.class, Text.class, Text.class, Text.class, new Configuration(false));
 
-        ChainMapper.addMapper(job, CustomFieldSelectorMapper.class, Text.class,
-                Text.class, Text.class, Text.class,
-                new Configuration(false));
+        ChainMapper.addMapper(job, LowerCaseMapper.class, Text.class, Text.class, Text.class, Text.class, new Configuration(false));
 
         // Setting the input and output path
         Path inputPath = new Path(args[0]);

@@ -8,7 +8,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
 
-public class LanguageFilterMapper extends Mapper<LongWritable, Text, Text, Text> {
+public class LanguageFilterMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -16,7 +16,7 @@ public class LanguageFilterMapper extends Mapper<LongWritable, Text, Text, Text>
         try {
             JSONObject obj = new JSONObject(value.toString());
             if (obj.getString("lang").equals("es"))
-                context.write(new Text(""), new Text(obj.toString()));
+                context.write(key, new Text(obj.toString()));
 
         } catch (JSONException e) {
             e.printStackTrace();

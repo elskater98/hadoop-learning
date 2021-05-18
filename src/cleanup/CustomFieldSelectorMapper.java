@@ -1,5 +1,6 @@
 package cleanup;
 
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jettison.json.JSONException;
@@ -7,10 +8,10 @@ import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
 
-public class CustomFieldSelectorMapper extends Mapper<Text, Text, Text, Text> {
+public class CustomFieldSelectorMapper extends Mapper<LongWritable, Text, Text, Text> {
 
     @Override
-    protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+    protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
         try {
             JSONObject obj = new JSONObject(value.toString());
@@ -19,7 +20,7 @@ public class CustomFieldSelectorMapper extends Mapper<Text, Text, Text, Text> {
             clean.put("hashtags", obj.getJSONObject("entities").getJSONArray("hashtags"));
             clean.put("lang", obj.getString("lang"));
 
-            context.write(key, new Text(clean.toString()));
+            context.write(new Text(""), new Text(clean.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         }
