@@ -19,7 +19,6 @@ import topn.TopNMapper;
 import topn.TopNReducer;
 import trendingtopic.TrendingTopic;
 import trendingtopic.TrendingTopicJSONMapper;
-import trendingtopic.TrendingTopicMapper;
 import trendingtopic.TrendingTopicReducer;
 
 import java.net.URI;
@@ -82,7 +81,7 @@ public class AllJobs {
         job = Job.getInstance(conf, "Trending Topics");
 
         job.setJarByClass(TrendingTopic.class);
-        job.setMapperClass(TrendingTopicMapper.class);
+        job.setMapperClass(TrendingTopicJSONMapper.class);
         job.setReducerClass(TrendingTopicReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
