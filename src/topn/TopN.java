@@ -23,6 +23,11 @@ public class TopN extends Configured implements Tool {
 
         args = new GenericOptionsParser(conf, args).getRemainingArgs();
 
+        Path inputPath = new Path(args[1]);
+        Path outputPath = new Path(args[2]);
+        FileSystem fs = FileSystem.get(new URI(outputPath.toString()), conf);
+        fs.delete(outputPath, true);
+
         // Job
         Job job = Job.getInstance(conf, "TopN");
         job.setJarByClass(getClass());
@@ -31,12 +36,6 @@ public class TopN extends Configured implements Tool {
         job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(Text.class);
 
-
-        Path inputPath = new Path(args[1]);
-        Path outputPath = new Path(args[2]);
-        FileSystem fs = FileSystem.get(new URI(outputPath.toString()), conf);
-        fs.delete(outputPath, true);
-        
         FileInputFormat.addInputPath(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
 
