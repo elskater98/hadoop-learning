@@ -18,6 +18,7 @@ import topn.TopN;
 import topn.TopNMapper;
 import topn.TopNReducer;
 import trendingtopic.TrendingTopic;
+import trendingtopic.TrendingTopicJSONMapper;
 import trendingtopic.TrendingTopicMapper;
 import trendingtopic.TrendingTopicReducer;
 
@@ -36,73 +37,53 @@ public class AllJobs {
         JobControl jobctrl = new JobControl("jobcontrol");
 
         Path inputPath = new Path(args[0]);
-        conf.set("N", args[1]);
+        String outputDir = args[1];
+        conf.set("N", args[2]);
 
-        Path cleanupDataOut = new Path(args[2]);
-        Path ttopicDataOut = new Path(args[3]);
-        Path topNDataOut = new Path(args[4]);
-
-        Path sentimentsDataOut = new Path(args[5]);
-        String positivePath = args[6];
-        String negativePath = args[7];
+        // Out Paths
+        Path outputPath = new Path(outputDir);
+        Path trendingTopicOutputPath = new Path(outputDir + "/trendingtopic");
+        Path cleanupOutputPath = new Path(outputDir + "/cleanup");
+        Path topnOutputPath = new Path(outputDir + "/topn");
 
 
         /* DELETE OUTPUT FOLDERS */
-        FileSystem fs = FileSystem.get(new URI(cleanupDataOut.toString()), conf);
-        fs.delete(cleanupDataOut, true);
+        FileSystem fs = FileSystem.get(new URI(outputPath.toString()), conf);
+        fs.delete(outputPath, true);
 
-        fs = FileSystem.get(new URI(ttopicDataOut.toString()), conf);
-        fs.delete(ttopicDataOut, true);
-
-        fs = FileSystem.get(new URI(topNDataOut.toString()), conf);
-        fs.delete(topNDataOut, true);
-
-        fs = FileSystem.get(new URI(sentimentsDataOut.toString()), conf);
-        fs.delete(sentimentsDataOut, true);
 
         /* CLEANUP */
-        Job job = Job.getInstance(conf);
-        job.setJobName("Cleanup");
+        Job job = Job.getInstance(conf, "Cleanup");
         job.setJarByClass(Cleanup.class);
 
-        ChainMapper.addMapper(job, CorrectFieldsMapper.class, LongWritable.class,
-                Text.class, LongWritable.class, Text.class,
-                new Configuration(false));
+        ChainMapper.addMapper(job, CorrectFieldsMapper.class, LongWritable.class, Text.class, LongWritable.class, Text.class, new Configuration(false));
 
-        ChainMapper.addMapper(job, LowerCaseMapper.class, LongWritable.class,
-                Text.class, LongWritable.class, Text.class,
-                new Configuration(false));
+        ChainMapper.addMapper(job, LanguageFilterMapper.class, LongWritable.class, Text.class, LongWritable.class, Text.class, new Configuration(false));
 
-        ChainMapper.addMapper(job, LanguageFilterMapper.class, LongWritable.class,
-                Text.class, Text.class, Text.class,
-                new Configuration(false));
+        ChainMapper.addMapper(job, CustomFieldSelectorMapper.class, LongWritable.class, Text.class, Text.class, Text.class, new Configuration(false));
 
-        ChainMapper.addMapper(job, CustomFieldSelectorMapper.class, Text.class,
-                Text.class, Text.class, Text.class,
-                new Configuration(false));
-
+        ChainMapper.addMapper(job, LowerCaseMapper.class, Text.class, Text.class, Text.class, Text.class, new Configuration(false));
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
+        //Compress Files
         SequenceFileOutputFormat.setCompressOutput(job, true);
         SequenceFileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
         SequenceFileOutputFormat.setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
 
         FileInputFormat.addInputPath(job, inputPath);
-        FileOutputFormat.setOutputPath(job, cleanupDataOut);
+        FileOutputFormat.setOutputPath(job, cleanupOutputPath);
 
         ControlledJob controlledJob1 = new ControlledJob(conf);
         controlledJob1.setJob(job);
 
         /*TRENDING TOPICS*/
-        job = Job.getInstance(conf);
-        job.setJobName("Trending Topics");
+        job = Job.getInstance(conf, "Trending Topics");
 
         job.setJarByClass(TrendingTopic.class);
         job.setMapperClass(TrendingTopicMapper.class);
         job.setReducerClass(TrendingTopicReducer.class);
-        job.setCombinerClass(TrendingTopicReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
 
@@ -110,23 +91,22 @@ public class AllJobs {
         SequenceFileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
         SequenceFileOutputFormat.setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
 
-        FileInputFormat.addInputPath(job, cleanupDataOut);
-        FileOutputFormat.setOutputPath(job, ttopicDataOut);
+        FileInputFormat.addInputPath(job, cleanupOutputPath);
+        FileOutputFormat.setOutputPath(job, trendingTopicOutputPath);
 
         ControlledJob controlledJob2 = new ControlledJob(conf);
         controlledJob2.setJob(job);
 
         /*TOP N*/
-        job = Job.getInstance(conf);
-        job.setJobName("TopN");
+        job = Job.getInstance(conf, "TopN");
         job.setJarByClass(TopN.class);
         job.setMapperClass(TopNMapper.class);
         job.setReducerClass(TopNReducer.class);
         job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(Text.class);
 
-        FileInputFormat.addInputPath(job, ttopicDataOut);
-        FileOutputFormat.setOutputPath(job, topNDataOut);
+        FileInputFormat.addInputPath(job, trendingTopicOutputPath);
+        FileOutputFormat.setOutputPath(job, topnOutputPath);
 
         ControlledJob controlledJob3 = new ControlledJob(conf);
         controlledJob3.setJob(job);

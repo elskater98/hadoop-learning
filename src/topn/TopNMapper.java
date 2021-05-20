@@ -9,24 +9,22 @@ import java.io.IOException;
 import java.util.TreeMap;
 
 public class TopNMapper extends Mapper<LongWritable, Text, NullWritable, Text> {
-    private final TreeMap<Integer, Text> tweetToRecordMap = new TreeMap<>();
+    private final TreeMap<Integer, Text> treeMap = new TreeMap<>();
 
     @Override
     protected void map(LongWritable key, Text value, Context context) {
 
-        String[] hasthag_times = value.toString().split("\t");
-        String hashtag = hasthag_times[0];
-        Integer times = Integer.parseInt(hasthag_times[1]);
+        String[] line = value.toString().split("\t"); //Format: "hashtag number" 0:hashtag 1:number
 
-        tweetToRecordMap.put(times, new Text(hashtag + '\t' + hasthag_times[1]));
-
-        if (tweetToRecordMap.size() > 2 * Integer.parseInt(context.getConfiguration().get("N")))
-            tweetToRecordMap.remove(tweetToRecordMap.firstKey());
+        treeMap.put(Integer.parseInt(line[1]), new Text(line[0] + '\t' + line[1]));
+        if (treeMap.size() > 2 * Integer.parseInt(context.getConfiguration().get("N"))) {
+            treeMap.remove(treeMap.firstKey());
+        }
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        for (Text text : tweetToRecordMap.values()){
+        for (Text text : treeMap.values()) {
             context.write(NullWritable.get(), text);
         }
 

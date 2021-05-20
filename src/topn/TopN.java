@@ -19,14 +19,11 @@ import java.net.URI;
 public class TopN extends Configured implements Tool {
     public int run(String[] args) throws Exception {
         Configuration conf = getConf();
+        conf.set("N", args[0]); // Store argument received as N
+
         args = new GenericOptionsParser(conf, args).getRemainingArgs();
 
-        conf.set("N", args[2]);
-        Path inputPath = new Path(args[0]);
-        Path outputPath = new Path(args[1]);
-        FileSystem fs = FileSystem.get(new URI(outputPath.toString()), conf);
-        fs.delete(outputPath, true);
-
+        // Job
         Job job = Job.getInstance(conf, "TopN");
         job.setJarByClass(getClass());
         job.setMapperClass(TopNMapper.class);
@@ -34,6 +31,12 @@ public class TopN extends Configured implements Tool {
         job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(Text.class);
 
+
+        Path inputPath = new Path(args[1]);
+        Path outputPath = new Path(args[2]);
+        FileSystem fs = FileSystem.get(new URI(outputPath.toString()), conf);
+        fs.delete(outputPath, true);
+        
         FileInputFormat.addInputPath(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
 
