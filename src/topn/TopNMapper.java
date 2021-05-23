@@ -27,6 +27,5 @@ public class TopNMapper extends Mapper<LongWritable, Text, NullWritable, Text> {
         for (Text text : treeMap.values()) {
             context.write(NullWritable.get(), text);
         }
-
     }
 }

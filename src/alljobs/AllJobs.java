@@ -35,23 +35,24 @@ public class AllJobs {
         args = new GenericOptionsParser(conf, args).getRemainingArgs();
         JobControl jobctrl = new JobControl("jobcontrol");
 
+        // Arguments
         Path inputPath = new Path(args[0]);
         String outputDir = args[1];
         conf.set("N", args[2]);
 
-        // Out Paths
+        // Interim paths
         Path outputPath = new Path(outputDir);
         Path trendingTopicOutputPath = new Path(outputDir + "/trendingtopic");
         Path cleanupOutputPath = new Path(outputDir + "/cleanup");
         Path topnOutputPath = new Path(outputDir + "/topn");
 
 
-        /* DELETE OUTPUT FOLDERS */
+        // Delete output files
         FileSystem fs = FileSystem.get(new URI(outputPath.toString()), conf);
         fs.delete(outputPath, true);
 
 
-        /* CLEANUP */
+        // Cleanup Task
         Job job = Job.getInstance(conf, "Cleanup");
         job.setJarByClass(Cleanup.class);
 
@@ -77,8 +78,8 @@ public class AllJobs {
         ControlledJob controlledJob1 = new ControlledJob(conf);
         controlledJob1.setJob(job);
 
-        /*TRENDING TOPICS*/
-        job = Job.getInstance(conf, "Trending Topics");
+        // Trending topic
+        job = Job.getInstance(conf, "Trending Topic");
 
         job.setJarByClass(TrendingTopic.class);
         job.setMapperClass(TrendingTopicJSONMapper.class);
@@ -96,7 +97,7 @@ public class AllJobs {
         ControlledJob controlledJob2 = new ControlledJob(conf);
         controlledJob2.setJob(job);
 
-        /*TOP N*/
+        // Top N
         job = Job.getInstance(conf, "TopN");
         job.setJarByClass(TopN.class);
         job.setMapperClass(TopNMapper.class);
@@ -111,15 +112,13 @@ public class AllJobs {
         controlledJob3.setJob(job);
 
 
-        /*JOBS DEPENDENCIES*/
+        // Manage task dependencies
         jobctrl.addJob(controlledJob1);
         jobctrl.addJob(controlledJob2);
         jobctrl.addJob(controlledJob3);
 
-
         controlledJob2.addDependingJob(controlledJob1);
         controlledJob3.addDependingJob(controlledJob2);
-
 
         Thread jobRunnerThread = new Thread(new JobRunner(jobctrl));
         jobRunnerThread.start();

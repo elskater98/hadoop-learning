@@ -13,7 +13,7 @@ public class TopNReducer extends Reducer<NullWritable, Text, NullWritable, Text>
     public void reduce(NullWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
         for (Text value : values) {
-            String[] line = value.toString().split("\t"); //Format: "hashtag number" 0:hashtag 1:number
+            String[] line = value.toString().split("\t"); //Format: "hashtag number" | line = line[0]:hashtag line[1]:number
 
             treeMap.put(Integer.parseInt(line[1]), new Text(line[0] + '\t' + line[1]));
 
@@ -25,6 +25,5 @@ public class TopNReducer extends Reducer<NullWritable, Text, NullWritable, Text>
         for (Text text : treeMap.descendingMap().values()) {
             context.write(NullWritable.get(), text);
         }
-
     }
 }
