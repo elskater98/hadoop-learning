@@ -12,6 +12,7 @@ public class SentimentWritable implements Writable {
     private final IntWritable ratio;
     private final IntWritable length;
 
+    // Default constructor
     public SentimentWritable() {
         this.ratio = new IntWritable(0);
         this.length = new IntWritable(0);

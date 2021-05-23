@@ -48,5 +48,4 @@ public class Sentiment extends Configured implements Tool {
         int exitCode = ToolRunner.run(new Sentiment(), args);
         System.exit(exitCode);
     }
-
 }
