@@ -14,13 +14,13 @@ public class CustomFieldSelectorMapper extends Mapper<LongWritable, Text, Text, 
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
         try {
-            JSONObject obj = new JSONObject(value.toString());
-            JSONObject clean = new JSONObject();
-            clean.put("text", obj.getString("text"));
-            clean.put("hashtags", obj.getJSONObject("entities").getJSONArray("hashtags"));
-            clean.put("lang", obj.getString("lang"));
+            JSONObject json = new JSONObject(value.toString());
+            JSONObject json_output = new JSONObject();
+            json_output.put("text", json.getString("text"));
+            json_output.put("hashtags", json.getJSONObject("entities").getJSONArray("hashtags"));
+            json_output.put("lang", json.getString("lang"));
 
-            context.write(new Text(""), new Text(clean.toString()));
+            context.write(new Text(""), new Text(json_output.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         }

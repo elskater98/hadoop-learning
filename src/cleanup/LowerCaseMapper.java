@@ -1,6 +1,5 @@
 package cleanup;
 
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.codehaus.jettison.json.JSONException;
@@ -14,11 +13,12 @@ public class LowerCaseMapper extends Mapper<Text, Text, Text, Text> {
     protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
 
         try {
-            JSONObject obj = new JSONObject(value.toString());
-            if (obj.has("text"))
-                obj.put("text", obj.getString("text").toLowerCase());
+            JSONObject json = new JSONObject(value.toString());
+            if (json.has("text")) {
+                json.put("text", json.getString("text").toLowerCase());
+            }
 
-            context.write(new Text(""), new Text(obj.toString()));
+            context.write(new Text(""), new Text(json.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         }

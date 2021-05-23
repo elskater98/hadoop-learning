@@ -14,17 +14,19 @@ public class TrendingTopicJSONMapper extends Mapper<LongWritable, Text, Text, In
     private final static IntWritable one = new IntWritable(1);
 
     @Override
-    protected void map(LongWritable key, Text value, Mapper.Context context) throws IOException, InterruptedException {
+    protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
         try {
-            JSONObject obj = new JSONObject(value.toString());
-            JSONArray values = obj.getJSONArray("hashtags");
+            JSONObject json = new JSONObject(value.toString());
+            JSONArray values = json.getJSONArray("hashtags");
             for (int i = 0; i < values.length(); i++) {
 
-                JSONObject hasthag = values.getJSONObject(i);
-                String text = hasthag.getString("text");
-                if (text.isEmpty())
+                JSONObject hashtag = values.getJSONObject(i);
+                String text = hashtag.getString("text");
+
+                if (text.isEmpty()) {
                     continue;
+                }
 
                 context.write(new Text(text), one);
             }

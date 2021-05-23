@@ -14,9 +14,10 @@ public class LanguageFilterMapper extends Mapper<LongWritable, Text, LongWritabl
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
         try {
-            JSONObject obj = new JSONObject(value.toString());
-            if (obj.getString("lang").equals("es"))
-                context.write(key, new Text(obj.toString()));
+            JSONObject json = new JSONObject(value.toString());
+            if (json.getString("lang").equals("es")) {
+                context.write(key, new Text(json.toString()));
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();

@@ -15,19 +15,19 @@ public class CorrectFieldsMapper extends Mapper<LongWritable, Text, LongWritable
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
         try {
-            JSONObject obj = new JSONObject(value.toString());
-            if (!obj.has("entities") || !obj.has("text"))
+            JSONObject json = new JSONObject(value.toString());
+            if (!json.has("entities") || !json.has("text"))
                 return;
 
-            JSONObject ent = obj.getJSONObject("entities");
-            if (!ent.has("hashtags"))
+            JSONObject entities = json.getJSONObject("entities");
+            if (!entities.has("hashtags"))
                 return;
 
-            JSONArray values = ent.getJSONArray("hashtags");
-            if (values.length() == 0)
+            JSONArray hashtags = entities.getJSONArray("hashtags");
+            if (hashtags.length() == 0)
                 return;
 
-            context.write(key, new Text(obj.toString()));
+            context.write(key, new Text(json.toString()));
 
         } catch (JSONException e) {
             e.printStackTrace();
