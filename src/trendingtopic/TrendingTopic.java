@@ -28,8 +28,8 @@ public class TrendingTopic extends Configured implements Tool {
         job.setJarByClass(getClass());
 
         // Set Mapper
-        job.setMapperClass(TrendingTopicMapper.class);
-        //job.setMapperClass(TrendingTopicJSONMapper.class); Only use .json or driver alljobs
+        //job.setMapperClass(TrendingTopicMapper.class);
+        job.setMapperClass(TrendingTopicJSONMapper.class); //Only use .json or driver alljobs
 
         // Set Reducer
         job.setReducerClass(TrendingTopicReducer.class);
